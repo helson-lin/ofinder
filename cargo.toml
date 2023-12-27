@@ -1,0 +1,28 @@
+[package]
+name = "ofind"
+version = "0.1.0"
+edition = "2021"
+description = "A Rust implementation of the find utility"
+build = "build.rs"
+
+[package.metadata.bundle]
+name = "ofind" 
+identifier = "com.helsonlin.ofind" 
+icon = ["icons/icon_128x128.png", "icons/icon_256x256.png"] 
+version = "0.1.0" 
+resources = ["assets"] 
+default_run = "ofind"
+
+# macOS特定的设置
+[package.metadata.bundle.osx]
+minimum_system_version = "10.10" # 最低支持的macOS版本
+main_executable = "ofind" # 你的主可执行文件的名称，通常与项目名称相同
+
+# Windows 特定的设置，如果你打算使用 cargo-wix
+[package.metadata.wix]
+product-name = "ofind"
+manufacturer = "com.helsonlin.ofind"
+upgrade-code = "12345678-1234-1234-1234-123456789012" # 替换为你自己的 GUID
+
+[dependencies]
+
