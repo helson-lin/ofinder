@@ -3,5 +3,5 @@
 version = 3
 
 [[package]]
-name = "ofind"
+name = "of"
 version = "0.1.0"
