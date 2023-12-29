@@ -94,7 +94,7 @@ jobs:
 
     - name: List Target
       shell: bash
-      run: cd target && ll
+      run: cd target
 
       
     - name: Upload Release Asset
