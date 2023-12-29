@@ -92,15 +92,19 @@ jobs:
         echo "BIN_PATH=${BIN_PATH}" >> $GITHUB_OUTPUT
         echo "BIN_NAME=${BIN_NAME}" >> $GITHUB_OUTPUT
 
+    - name: List Target
+      shell: bash
+      run: cd target && ll
+
       
     - name: Upload Release Asset
-      uses: actions/upload-release-asset@v1
+      uses: actions/upload-release-asset@master
       env:
         GITHUB_TOKEN: ${{ secrets.TOKEN }}
         
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./target/x86_64-unknown-linux-musl/release/of
+        asset_path: ./target/aarch64-unknown-linux-gnu/release/of
         asset_name: of
-        asset_content_type: application/octet-stream
+        asset_content_type: application/binary
   
