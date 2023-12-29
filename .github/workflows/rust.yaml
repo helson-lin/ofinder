@@ -90,18 +90,23 @@ jobs:
         # Let subsequent steps know where to find the binary
         echo "BIN_PATH=${BIN_PATH}" >> $GITHUB_OUTPUT
         echo "BIN_NAME=${BIN_NAME}" >> $GITHUB_OUTPUT
+        echo "BIN_PATH=${BIN_PATH}"
+        echo "BIN_NAME=${BIN_NAME}"
 
     - name: Upload Artifact
       uses: actions/upload-artifact@v2
       with:
         name: my-artifact
         path: ${{ steps.bin.outputs.BIN_PATH }}
+    
+    - name: Print binary path
+      run: echo "Binary path is ${{ steps.bin.outputs.BIN_PATH }}"
 
     - name: Publish releases
       uses: softprops/action-gh-release@v1
       if: startsWith(github.ref, 'refs/tags/v')
       with:
-        files: ${{ runner.workspace }}/my-artifact
+        files: ${{ steps.bin.outputs.BIN_PATH }}/*
 
     - name: Check for release
       id: is-release
