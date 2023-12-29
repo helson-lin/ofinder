@@ -11,47 +11,88 @@ env:
 
 jobs:
   build:
-
-    runs-on: ubuntu-latest
+    name: ${{ matrix.job.target }} (${{ matrix.job.os }})
+    runs-on: ${{ matrix.job.os }}
     permissions: write-all
-    
+    strategy:
+      fail-fast: false
+      matrix:
+        job:
+          - { target: aarch64-unknown-linux-gnu   , os: ubuntu-20.04, dpkg_arch: arm64,            use-cross: true }
+          - { target: arm-unknown-linux-gnueabihf , os: ubuntu-20.04, dpkg_arch: armhf,            use-cross: true }
+          - { target: arm-unknown-linux-musleabihf, os: ubuntu-20.04, dpkg_arch: musl-linux-armhf, use-cross: true }
+          - { target: i686-pc-windows-msvc        , os: windows-2019,                                              }
+          - { target: i686-unknown-linux-gnu      , os: ubuntu-20.04, dpkg_arch: i686,             use-cross: true }
+          - { target: i686-unknown-linux-musl     , os: ubuntu-20.04, dpkg_arch: musl-linux-i686,  use-cross: true }
+          - { target: x86_64-apple-darwin         , os: macos-12,                                                  }
+          - { target: x86_64-pc-windows-gnu       , os: windows-2019,                                              }
+          - { target: x86_64-pc-windows-msvc      , os: windows-2019,                                              }
+          - { target: x86_64-unknown-linux-gnu    , os: ubuntu-20.04, dpkg_arch: amd64,            use-cross: true }
+          - { target: x86_64-unknown-linux-musl   , os: ubuntu-20.04, dpkg_arch: musl-linux-amd64, use-cross: true }
+    env:
+      BUILD_CMD: cargo
 
     steps:
-    - uses: actions/checkout@v3
-    - name: Build
-      run: cargo build --verbose
-    - name: Run tests
-      run: cargo test --verbose
-    - name: Checkout code
-      uses: actions/checkout@v2
+    - name: Checkout source code
+      uses: actions/checkout@v4
 
-    - name: Install Rust
-      uses: actions-rs/toolchain@v1
-      with:
-        profile: minimal
-        toolchain: stable
-    
-    - name: Build release
+      - name: Install prerequisites
+      shell: bash
       run: |
-            rustup target add x86_64-unknown-linux-musl
-            cargo build -r --target x86_64-unknown-linux-musl
-            rustup target add x86_64-pc-windows-gnu
-            rustup target add x86_64-w64-mingw32-gc
-            cargo build -r --target x86_64-pc-windows-gnu
-            ll
-      
-    - name: Create Release
-      id: create_release
-      uses: actions/create-release@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.TOKEN }}
-      
-      with:
-        tag_name: v${{ github.ref }}
-        release_name: Release ${{ github.ref }}
-        draft: false
-        prerelease: false
+        case ${{ matrix.job.target }} in
+          arm-unknown-linux-*) sudo apt-get -y update ; sudo apt-get -y install gcc-arm-linux-gnueabihf ;;
+          aarch64-unknown-linux-gnu) sudo apt-get -y update ; sudo apt-get -y install gcc-aarch64-linux-gnu ;;
+        esac
 
+    - name: Install Rust toolchain
+      uses: dtolnay/rust-toolchain@stable
+      with:
+        targets: ${{ matrix.job.target }}
+
+    - name: Install cross
+      if: matrix.job.use-cross
+      uses: taiki-e/install-action@v2
+      with:
+        tool: cross
+
+    - name: Overwrite build command env variable
+      if: matrix.job.use-cross
+      shell: bash
+      run: echo "BUILD_CMD=cross" >> $GITHUB_ENV
+
+    - name: Show version information (Rust, cargo, GCC)
+      shell: bash
+      run: |
+        gcc --version || true
+        rustup -V
+        rustup toolchain list
+        rustup default
+        cargo -V
+        rustc -V
+
+    - name: Build
+      shell: bash
+      run: $BUILD_CMD build --locked --release --target=${{ matrix.job.target }}
+
+    - name: Set binary name & path
+      id: bin
+      shell: bash
+      run: |
+        # Figure out suffix of binary
+        EXE_suffix=""
+        case ${{ matrix.job.target }} in
+          *-pc-windows-*) EXE_suffix=".exe" ;;
+        esac;
+
+        # Setup paths
+        BIN_NAME="${{ needs.crate_metadata.outputs.name }}${EXE_suffix}"
+        BIN_PATH="target/${{ matrix.job.target }}/release/${BIN_NAME}"
+
+        # Let subsequent steps know where to find the binary
+        echo "BIN_PATH=${BIN_PATH}" >> $GITHUB_OUTPUT
+        echo "BIN_NAME=${BIN_NAME}" >> $GITHUB_OUTPUT
+
+      
     - name: Upload Release Asset
       uses: actions/upload-release-asset@v1
       env:
@@ -62,4 +103,4 @@ jobs:
         asset_path: ./target/x86_64-unknown-linux-musl/release/of
         asset_name: of
         asset_content_type: application/octet-stream
-    
+  
