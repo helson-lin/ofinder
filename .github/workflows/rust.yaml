@@ -36,7 +36,7 @@ jobs:
     - name: Checkout source code
       uses: actions/checkout@v4
 
-      - name: Install prerequisites
+    - name: Install prerequisites
       shell: bash
       run: |
         case ${{ matrix.job.target }} in
