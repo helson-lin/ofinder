@@ -3,7 +3,7 @@ name = "of"
 version = "0.1.0"
 authors = ["helson lin <helsonlin@outlook.com>"]
 homepage = "https://github.com/helson-lin"
-rust_version = "1.74.1"
+rust-version = "1.74.1"
 edition = "2021"
 description = "A Rust implementation of the find utility"
 
