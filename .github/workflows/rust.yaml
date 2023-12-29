@@ -92,19 +92,21 @@ jobs:
         echo "BIN_PATH=${BIN_PATH}" >> $GITHUB_OUTPUT
         echo "BIN_NAME=${BIN_NAME}" >> $GITHUB_OUTPUT
 
-    - name: List Target
-      shell: bash
-      run: cd target
-
       
-    - name: Upload Release Asset
-      uses: actions/upload-release-asset@master
-      env:
-        GITHUB_TOKEN: ${{ secrets.TOKEN }}
-        
+    - name: Check for release
+      id: is-release
+      shell: bash
+      run: |
+        unset IS_RELEASE ; if [[ $GITHUB_REF =~ ^refs/tags/v[0-9].* ]]; then IS_RELEASE='true' ; fi
+        echo "IS_RELEASE=${IS_RELEASE}" >> $GITHUB_OUTPUT
+
+    - name: Publish archives and packages
+      uses: softprops/action-gh-release@v1
+      if: steps.is-release.outputs.IS_RELEASE
       with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./target/aarch64-unknown-linux-gnu/release/of
-        asset_name: of
-        asset_content_type: application/binary
+        files: |
+          ${{ steps.package.outputs.PKG_PATH }}
+          ${{ steps.debian-package.outputs.DPKG_PATH }}
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   
