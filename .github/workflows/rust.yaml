@@ -114,6 +114,7 @@ jobs:
         esac;
 
         # Setup paths
+        echo "${{ needs.crate_metadata}}"
         BIN_NAME="${{ needs.crate_metadata.outputs.name }}${EXE_suffix}"
         BIN_PATH="target/${{ matrix.job.target }}/release/${BIN_NAME}"
 
