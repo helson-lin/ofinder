@@ -117,13 +117,13 @@ jobs:
         # Setup paths
         echo "${{ needs.crate_metadata}}"
         BIN_NAME="${{ needs.crate_metadata.outputs.name }}${EXE_suffix}"
+        mv "target/${{ matrix.job.target }}/release/${BIN_NAME}" "target/${{ matrix.job.target }}/release/${{ matrix.job.target }}-${BIN_NAME}"
         BIN_PATH="target/${{ matrix.job.target }}/release/${BIN_NAME}"
-
         # Let subsequent steps know where to find the binary
         echo "BIN_PATH=${BIN_PATH}" >> $GITHUB_OUTPUT
         echo "BIN_NAME=${BIN_NAME}" >> $GITHUB_OUTPUT
         echo "BIN_PATH=${BIN_PATH}"
-        echo "BIN_NAME=${BIN_NAME}"
+        echo "BIN_NAME=${{ matrix.job.target }}-${BIN_NAME}"
 
     - name: Upload Artifact
       uses: actions/upload-artifact@v2
