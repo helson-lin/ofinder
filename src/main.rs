@@ -7,7 +7,7 @@ fn main() {
 
     // 检查参数是否正确
     if args.len() < 2 {
-        eprintln!("Usage: finder <directory>...");
+        eprintln!("Usage: of <directory>...");
         exit(1);
     }
 
