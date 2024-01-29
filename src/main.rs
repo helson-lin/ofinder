@@ -1,15 +1,28 @@
 use std::env;
 use std::process::{Command, exit};
 
+// 定义版本信息，这里只是示例，可以根据实际情况修改
+const VERSION: &str = "0.0.1";
+
 fn main() {
     // 获取命令行参数
     let args: Vec<String> = env::args().collect();
 
+    // 检查是否仅用于查看版本信息
+    if args.len() == 2 && (args[1] == "-v" || args[1] == "--version") {
+        println!("of version {}", VERSION);
+        exit(0);
+    }
+
     // 检查参数是否正确
     if args.len() < 2 {
-        eprintln!("Usage: of <directory>...");
+        eprintln!("Usage: of <directory>... | -v --version");
+        eprintln!("Example: of .");
+        eprintln!("         of /path/to/directory");
+        eprintln!("         of -v");
         exit(1);
     }
+
 
     // 遍历参数列表中的目录
     for directory in args[1..].iter() {
