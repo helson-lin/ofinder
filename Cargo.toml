@@ -9,3 +9,11 @@ description = "A Rust implementation of the find utility"
 
 [dependencies]
 
+
+[package.metadata.bundle]
+name = "ofind"
+identifier = "com.helsonlin.ofind"
+icon = ["images/icon_256.png"]
+copyright = "Copyright (c) LeeeSe 2024. All rights reserved."
+short_description = "Termial Open folder"
+resources = ["images/icon.png"]
